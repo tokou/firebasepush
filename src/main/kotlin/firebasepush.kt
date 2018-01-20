@@ -125,15 +125,15 @@ class MainView : View("Firebase Push") {
         }
         button("Send") {
             action {
-                runLater {
-                    preferences {
+                runAsyncWithProgress {
+                    runLater { preferences {
                         put("server_key", serverKeyField.text)
+                    } }
+                    val payload = Payload()
+                    api.post("send", payload) {
+                        it.addHeader("Content-Type", "application/json")
+                        it.addHeader("Authorization", "key=${serverKeyField.text}")
                     }
-                }
-                val payload = Payload()
-                api.post("send", payload) {
-                    it.addHeader("Content-Type", "application/json")
-                    it.addHeader("Authorization", "key=${serverKeyField.text}")
                 }
             }
         }
