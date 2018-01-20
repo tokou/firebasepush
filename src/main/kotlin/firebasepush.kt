@@ -14,6 +14,12 @@ class Payload : JsonModel {
 
     val dataProperty = SimpleObjectProperty<Data>()
     var data by dataProperty
+
+    override fun toJSON(json: JsonBuilder) { with(json) {
+        add("registration_ids", registrationIds)
+        add("notification", notification)
+        add("data", data)
+    } }
 }
 
 class Notification : JsonModel {
@@ -22,11 +28,20 @@ class Notification : JsonModel {
 
     val bodyProperty = SimpleStringProperty()
     var body by bodyProperty
+
+    override fun toJSON(json: JsonBuilder) { with(json) {
+        add("title", title)
+        add("body", body)
+    } }
 }
 
 class Data : JsonModel {
     val dataProperty = SimpleMapProperty<String, String>()
     var values by dataProperty
+
+    override fun toJSON(json: JsonBuilder) { with(json) {
+        values.forEach { k, v -> add(k, v) }
+    } }
 }
 
 class MainView : View("Firebase Push") {
