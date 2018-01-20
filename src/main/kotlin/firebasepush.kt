@@ -1,6 +1,10 @@
+import javafx.scene.control.CheckBox
 import tornadofx.*
 
 class MainView : View("Firebase Push") {
+
+    var dataField: CheckBox by singleAssign()
+    var notificationField: CheckBox by singleAssign()
 
     override val root = form {
         fieldset("Config") {
@@ -17,22 +21,12 @@ class MainView : View("Firebase Push") {
         fieldset("Payload") {
             hbox {
                 field {
-                    checkbox("Notification")
-                }
-                vbox {
-                    field("Title") {
-                        textfield()
-                    }
-                    field("Body") {
-                        textfield()
+                    checkbox("Data") {
+                        dataField = this
                     }
                 }
-            }
-            hbox {
-                field {
-                    checkbox("Data")
-                }
                 vbox {
+                    visibleWhen { dataField.selectedProperty() }
                     hbox {
                         field("Key") {
                             textfield()
@@ -41,6 +35,22 @@ class MainView : View("Firebase Push") {
                             textfield()
                         }
                         button("+")
+                    }
+                }
+            }
+            hbox {
+                field {
+                    checkbox("Notification") {
+                        notificationField = this
+                    }
+                }
+                vbox {
+                    visibleWhen { notificationField.selectedProperty() }
+                    field("Title") {
+                        textfield()
+                    }
+                    field("Body") {
+                        textfield()
                     }
                 }
             }
