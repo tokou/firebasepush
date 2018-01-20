@@ -1,5 +1,30 @@
+import javafx.beans.property.SimpleListProperty
+import javafx.beans.property.SimpleMapProperty
+import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.CheckBox
 import tornadofx.*
+
+class Payload : JsonModel {
+    val registrationIdsProperty = SimpleListProperty<String>()
+    var registrationIds by registrationIdsProperty
+
+    val notificationProperty = SimpleObjectProperty<Notification>()
+    var notification by notificationProperty
+}
+
+class Notification : JsonModel {
+    val titleProperty = SimpleStringProperty()
+    var title by titleProperty
+
+    val bodyProperty = SimpleStringProperty()
+    var body by bodyProperty
+}
+
+class Data : JsonModel {
+    val dataProperty = SimpleMapProperty<String, String>()
+    var values by dataProperty
+}
 
 class MainView : View("Firebase Push") {
 
@@ -67,7 +92,16 @@ class MainView : View("Firebase Push") {
                 }
             }
         }
-        button("Send")
+        button("Send") {
+            action {
+                val payload = Payload()
+                val key = "SERVER_KEY"
+                api.post("send", payload) {
+                    it.addHeader("Content-Type", "application/json")
+                    it.addHeader("Authorization", "key=$key")
+                }
+            }
+        }
     }
 }
 
