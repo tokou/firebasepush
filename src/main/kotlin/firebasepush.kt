@@ -1,9 +1,8 @@
-import javafx.beans.property.SimpleListProperty
-import javafx.beans.property.SimpleMapProperty
-import javafx.beans.property.SimpleObjectProperty
-import javafx.beans.property.SimpleStringProperty
+import javafx.beans.property.*
+import javafx.collections.ObservableList
 import javafx.scene.control.CheckBox
 import javafx.scene.control.TextField
+import javafx.util.StringConverter
 import tornadofx.*
 
 class Payload : JsonModel {
@@ -37,12 +36,33 @@ class Notification : JsonModel {
 }
 
 class Data : JsonModel {
-    val dataProperty = SimpleMapProperty<String, String>()
-    var values by dataProperty
+    val valuesProperty = SimpleMapProperty<String, String>()
+    var values by valuesProperty
 
     override fun toJSON(json: JsonBuilder) { with(json) {
-        values.forEach { k, v -> add(k, v) }
+        values?.forEach { k, v -> add(k, v) }
     } }
+}
+
+class PayloadModel : ItemViewModel<Payload>(Payload()) {
+    val tokens = bind { item?.registrationIdsProperty }
+    val title = SimpleStringProperty()
+    val body = SimpleStringProperty()
+    val notification = SimpleBooleanProperty()
+    val data = SimpleBooleanProperty()
+
+    init {
+        notification.addListener { _, o, n ->
+            if (n && !o) item?.notification = Notification()
+            if (!n && o) item?.notification = null
+            item?.notification?.titleProperty?.bind(title)
+            item?.notification?.bodyProperty?.bind(body)
+        }
+        data.addListener { _, o, n ->
+            if (n && !o) item?.data = Data()
+            if (!n && o) item?.data = null
+        }
+    }
 }
 
 class MainView : View("Firebase Push") {
@@ -68,12 +88,22 @@ class MainView : View("Firebase Push") {
         }
     }
 
+    val model: PayloadModel by inject()
+
     var dataField: CheckBox by singleAssign()
     var notificationField: CheckBox by singleAssign()
     var serverKeyField: TextField by singleAssign()
 
     val statusProperty = SimpleStringProperty("")
     var status by statusProperty
+
+    val converter = object : StringConverter<ObservableList<String>>() {
+        override fun toString(`object`: ObservableList<String>?): String =
+            `object`?.joinToString("\n") ?: ""
+
+        override fun fromString(string: String?): ObservableList<String> =
+            (string?.split("\n")?: emptyList()).observable()
+    }
 
     override val root = form {
         fieldset("Config") {
@@ -83,7 +113,7 @@ class MainView : View("Firebase Push") {
                 }
             }
             field("Tokens") {
-                textarea {
+                textarea(model.tokens, converter) {
                     prefRowCount = 4
                     isWrapText = false
                 }
@@ -92,7 +122,7 @@ class MainView : View("Firebase Push") {
         fieldset("Payload") {
             hbox {
                 field {
-                    checkbox("Data") {
+                    checkbox("Data", model.data) {
                         dataField = this
                     }
                 }
@@ -111,17 +141,17 @@ class MainView : View("Firebase Push") {
             }
             hbox {
                 field {
-                    checkbox("Notification") {
+                    checkbox("Notification", model.notification) {
                         notificationField = this
                     }
                 }
                 vbox {
                     visibleWhen { notificationField.selectedProperty() }
                     field("Title") {
-                        textfield()
+                        textfield(model.title)
                     }
                     field("Body") {
-                        textfield()
+                        textfield(model.body)
                     }
                 }
             }
@@ -129,17 +159,20 @@ class MainView : View("Firebase Push") {
         button("Send") {
             action {
                 runLater { status = "" }
-                runAsyncWithProgress {
-                    runLater { preferences {
-                        put("server_key", serverKeyField.text)
-                    } }
-                    val payload = Payload()
-                    api.post("send", payload) {
-                        it.addHeader("Content-Type", "application/json")
-                        it.addHeader("Authorization", "key=${serverKeyField.text}")
+                model.commit {
+                    runAsyncWithProgress {
+                        runLater {
+                            preferences {
+                                put("server_key", serverKeyField.text)
+                            }
+                        }
+                        api.post("send", model.item) {
+                            it.addHeader("Content-Type", "application/json")
+                            it.addHeader("Authorization", "key=${serverKeyField.text}")
+                        }
+                    } ui {
+                        status = "${it.statusCode}: ${it.text()}"
                     }
-                } ui {
-                    status = "${it.statusCode}: ${it.text()}"
                 }
             }
         }
