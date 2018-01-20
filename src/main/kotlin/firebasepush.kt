@@ -72,6 +72,9 @@ class MainView : View("Firebase Push") {
     var notificationField: CheckBox by singleAssign()
     var serverKeyField: TextField by singleAssign()
 
+    val statusProperty = SimpleStringProperty("")
+    var status by statusProperty
+
     override val root = form {
         fieldset("Config") {
             field("Server Key") {
@@ -125,6 +128,7 @@ class MainView : View("Firebase Push") {
         }
         button("Send") {
             action {
+                runLater { status = "" }
                 runAsyncWithProgress {
                     runLater { preferences {
                         put("server_key", serverKeyField.text)
@@ -134,9 +138,12 @@ class MainView : View("Firebase Push") {
                         it.addHeader("Content-Type", "application/json")
                         it.addHeader("Authorization", "key=${serverKeyField.text}")
                     }
+                } ui {
+                    status = "${it.statusCode}: ${it.text()}"
                 }
             }
         }
+        label(statusProperty)
     }
 }
 
