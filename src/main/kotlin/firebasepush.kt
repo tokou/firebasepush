@@ -3,6 +3,7 @@ import javafx.beans.property.SimpleMapProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.CheckBox
+import javafx.scene.control.TextField
 import tornadofx.*
 
 class Payload : JsonModel {
@@ -64,11 +65,14 @@ class MainView : View("Firebase Push") {
 
     var dataField: CheckBox by singleAssign()
     var notificationField: CheckBox by singleAssign()
+    var serverKeyField: TextField by singleAssign()
 
     override val root = form {
         fieldset("Config") {
             field("Server Key") {
-                textfield()
+                textfield {
+                    serverKeyField = this
+                }
             }
             field("Tokens") {
                 textarea {
@@ -117,10 +121,9 @@ class MainView : View("Firebase Push") {
         button("Send") {
             action {
                 val payload = Payload()
-                val key = "SERVER_KEY"
                 api.post("send", payload) {
                     it.addHeader("Content-Type", "application/json")
-                    it.addHeader("Authorization", "key=$key")
+                    it.addHeader("Authorization", "key=${serverKeyField.text}")
                 }
             }
         }
