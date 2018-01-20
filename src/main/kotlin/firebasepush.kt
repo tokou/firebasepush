@@ -49,12 +49,16 @@ class MainView : View("Firebase Push") {
     val api: Rest by inject()
 
     init {
-        api.baseURI = "https://fcm.googleapis.com/fcm/"
-        api.engine.requestInterceptor = {
-            log.info("--> ${it.method} ${it.uri}\n${it.entity}")
-        }
-        api.engine.responseInterceptor = {
-            log.info("<-- ${it.statusCode}\n${it.text()}")
+        with(api) {
+            baseURI = "https://fcm.googleapis.com/fcm/"
+            with(engine) {
+                requestInterceptor = {
+                log.info("--> ${it.method} ${it.uri}\n${it.entity}")
+                }
+                responseInterceptor = {
+                    log.info("<-- ${it.statusCode}\n${it.text()}")
+                }
+            }
         }
     }
 
