@@ -49,6 +49,8 @@ class MainView : View("Firebase Push") {
 
     val api: Rest by inject()
 
+    lateinit var initialServerKey: String
+
     init {
         with(api) {
             baseURI = "https://fcm.googleapis.com/fcm/"
@@ -61,6 +63,9 @@ class MainView : View("Firebase Push") {
                 }
             }
         }
+        preferences {
+            initialServerKey = get("server_key", "")
+        }
     }
 
     var dataField: CheckBox by singleAssign()
@@ -70,7 +75,7 @@ class MainView : View("Firebase Push") {
     override val root = form {
         fieldset("Config") {
             field("Server Key") {
-                textfield {
+                textfield(initialServerKey) {
                     serverKeyField = this
                 }
             }
@@ -120,6 +125,11 @@ class MainView : View("Firebase Push") {
         }
         button("Send") {
             action {
+                runLater {
+                    preferences {
+                        put("server_key", serverKeyField.text)
+                    }
+                }
                 val payload = Payload()
                 api.post("send", payload) {
                     it.addHeader("Content-Type", "application/json")
