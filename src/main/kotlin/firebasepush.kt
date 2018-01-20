@@ -11,6 +11,9 @@ class Payload : JsonModel {
 
     val notificationProperty = SimpleObjectProperty<Notification>()
     var notification by notificationProperty
+
+    val dataProperty = SimpleObjectProperty<Data>()
+    var data by dataProperty
 }
 
 class Notification : JsonModel {
