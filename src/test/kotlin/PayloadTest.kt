@@ -1,4 +1,7 @@
-import junit.framework.Assert.assertEquals
+import com.github.tokou.firebasepush.Data
+import com.github.tokou.firebasepush.Notification
+import com.github.tokou.firebasepush.Payload
+import org.junit.Assert.assertEquals
 import org.junit.Test
 
 class PayloadTest {

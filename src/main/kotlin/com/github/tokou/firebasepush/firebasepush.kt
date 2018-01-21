@@ -1,3 +1,5 @@
+package com.github.tokou.firebasepush
+
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
@@ -7,7 +9,6 @@ import javafx.collections.ObservableList
 import javafx.geometry.Orientation
 import javafx.scene.control.CheckBox
 import javafx.scene.control.TextField
-import javafx.scene.layout.Priority
 import javafx.scene.text.FontWeight
 import javafx.util.StringConverter
 import tornadofx.*
