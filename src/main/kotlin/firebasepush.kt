@@ -1,7 +1,9 @@
 import javafx.beans.property.*
 import javafx.collections.ObservableList
+import javafx.geometry.Orientation
 import javafx.scene.control.CheckBox
 import javafx.scene.control.TextField
+import javafx.scene.layout.Priority
 import javafx.util.StringConverter
 import tornadofx.*
 
@@ -44,12 +46,30 @@ class Data : JsonModel {
     } }
 }
 
+class KeyValueModel(key: String, value: String) {
+    val keyProperty = SimpleStringProperty(key)
+    var key by keyProperty
+    val valueProperty = SimpleStringProperty(value)
+    var value by valueProperty
+
+    override fun equals(other: Any?): Boolean = when (other) {
+        is KeyValueModel -> if (key == null) false else other.key == key
+        else -> false
+    }
+
+    override fun hashCode(): Int {
+        return keyProperty.hashCode()
+    }
+}
+
 class PayloadModel : ItemViewModel<Payload>(Payload()) {
     val tokens = bind { item?.registrationIdsProperty }
     val title = SimpleStringProperty()
     val body = SimpleStringProperty()
     val notification = SimpleBooleanProperty()
     val data = SimpleBooleanProperty()
+    val values = SimpleListProperty<KeyValueModel>()
+    val selected = SimpleObjectProperty<KeyValueModel>()
 
     init {
         notification.addListener { _, o, n ->
@@ -62,7 +82,14 @@ class PayloadModel : ItemViewModel<Payload>(Payload()) {
             if (n && !o) item?.data = Data()
             if (!n && o) item?.data = null
         }
+        values.set(mutableListOf<KeyValueModel>().observable())
     }
+
+    override fun onCommit() {
+        item?.data?.values = convertValues()
+    }
+
+    private fun convertValues() = values.get().map { it.key to it.value }.toMap().observable()
 }
 
 class MainView : View("Firebase Push") {
@@ -116,29 +143,11 @@ class MainView : View("Firebase Push") {
                 textarea(model.tokens, converter) {
                     prefRowCount = 4
                     isWrapText = false
+                    vgrow = Priority.ALWAYS
                 }
             }
         }
         fieldset("Payload") {
-            hbox {
-                field {
-                    checkbox("Data", model.data) {
-                        dataField = this
-                    }
-                }
-                vbox {
-                    visibleWhen { dataField.selectedProperty() }
-                    hbox {
-                        field("Key") {
-                            textfield()
-                        }
-                        field("Value") {
-                            textfield()
-                        }
-                        button("+")
-                    }
-                }
-            }
             hbox {
                 field {
                     checkbox("Notification", model.notification) {
@@ -153,6 +162,30 @@ class MainView : View("Firebase Push") {
                     field("Body") {
                         textfield(model.body)
                     }
+                }
+            }
+            hbox {
+                field {
+                    checkbox("Data", model.data) {
+                        dataField = this
+                    }
+                }
+                tableview<KeyValueModel>(model.values) {
+                    visibleWhen { dataField.selectedProperty() }
+                    isEditable = true
+                    maxHeight = 200.0
+                    bindSelected(model.selected)
+                    column("Key", KeyValueModel::keyProperty).makeEditable()
+                    column("Value", KeyValueModel::valueProperty).makeEditable()
+                }
+                vbox {
+                    visibleWhen { dataField.selectedProperty() }
+                    button("+") { action {
+                        model.values.add(KeyValueModel("key", "value"))
+                    } }
+                    button("-") { action {
+                        model.values.remove(model.selected.get())
+                    } }
                 }
             }
         }
