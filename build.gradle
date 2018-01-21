@@ -10,7 +10,7 @@ buildscript {
 }
 
 group 'com.github.tokou.firebasepush'
-version '1.0-SNAPSHOT'
+version '0.9'
 
 apply plugin: 'kotlin'
 
@@ -22,6 +22,18 @@ dependencies {
     compile "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     compile "no.tornado:tornadofx:1.7.14"
     testCompile "junit:junit:4.12"
+}
+
+jar {
+    manifest {
+        attributes(
+            "Implementation-Title": "FirebasePush",
+            "Implementation-Version": version,
+            "Main-Class": "com.github.tokou.firebasepush.FirebasePushApp",
+            "Class-Path": configurations.compile.collect { it.getName() }.join(' ')
+        )
+    }
+    from configurations.compile.collect { entry -> zipTree(entry) }
 }
 
 compileKotlin {
