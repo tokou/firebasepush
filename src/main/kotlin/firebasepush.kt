@@ -8,6 +8,7 @@ import javafx.geometry.Orientation
 import javafx.scene.control.CheckBox
 import javafx.scene.control.TextField
 import javafx.scene.layout.Priority
+import javafx.scene.text.FontWeight
 import javafx.util.StringConverter
 import tornadofx.*
 
@@ -128,6 +129,7 @@ class MainView : View("Firebase Push") {
             }
             field("Tokens") {
                 textarea(model.tokens, converter) {
+                    tooltip("One token per line")
                     prefRowCount = 4
                     isWrapText = false
                 }
@@ -163,6 +165,7 @@ class MainView : View("Firebase Push") {
                         }
                     }
                     tableview<KeyValueModel>(model.values) {
+                        tooltip("Edit values by double clicking")
                         visibleWhen { dataField.selectedProperty() }
                         isEditable = true
                         maxHeight = 170.0
@@ -213,4 +216,13 @@ class MainView : View("Firebase Push") {
     }
 }
 
-class FirebasePushApp : App(MainView::class)
+class Style : Stylesheet() {
+    init {
+        legend {
+            fontWeight = FontWeight.BOLD
+            fontSize = 20.px
+        }
+    }
+}
+
+class FirebasePushApp : App(MainView::class, Style::class)
