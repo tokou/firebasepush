@@ -1,4 +1,7 @@
-import javafx.beans.property.*
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleListProperty
+import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.geometry.Orientation
@@ -114,7 +117,10 @@ class MainView : View("Firebase Push") {
     }
 
     override val root = form {
-        fieldset("Config") {
+        paddingAll = 10
+        spacing = 10.0
+        fieldset("Config", labelPosition = Orientation.VERTICAL) {
+            spacing = 10.0
             field("Server Key") {
                 textfield(initialServerKey) {
                     serverKeyField = this
@@ -124,49 +130,62 @@ class MainView : View("Firebase Push") {
                 textarea(model.tokens, converter) {
                     prefRowCount = 4
                     isWrapText = false
-                    vgrow = Priority.ALWAYS
                 }
             }
         }
         fieldset("Payload") {
-            hbox {
-                field {
-                    checkbox("Notification", model.notification) {
-                        notificationField = this
+            spacing = 10.0
+            borderpane {
+                left = vbox {
+                    spacing = 10.0
+                    paddingRight = 10.0
+                    field {
+                        checkbox("Notification", model.notification) {
+                            notificationField = this
+                        }
+                    }
+                    field {
+                        checkbox("Data", model.data) {
+                            dataField = this
+                        }
                     }
                 }
-                vbox {
-                    visibleWhen { notificationField.selectedProperty() }
-                    field("Title") {
-                        textfield(model.title)
+                center = vbox {
+                    spacing = 10.0
+                    fieldset {
+                        spacing = 4.0
+                        visibleWhen { notificationField.selectedProperty() }
+                        field("Title") {
+                            textfield(model.title)
+                        }
+                        field("Body") {
+                            textfield(model.body)
+                        }
                     }
-                    field("Body") {
-                        textfield(model.body)
+                    tableview<KeyValueModel>(model.values) {
+                        visibleWhen { dataField.selectedProperty() }
+                        isEditable = true
+                        maxHeight = 170.0
+                        bindSelected(model.selected)
+                        columnResizePolicy = SmartResize.POLICY
+                        column("Key", KeyValueModel::keyProperty).makeEditable().weightedWidth(1.0)
+                        column("Value", KeyValueModel::valueProperty).makeEditable().weightedWidth(2.0)
                     }
-                }
-            }
-            hbox {
-                field {
-                    checkbox("Data", model.data) {
-                        dataField = this
+                    hbox {
+                        visibleWhen { dataField.selectedProperty() }
+                        button("+") {
+                            minWidth = 50.0
+                            action {
+                                model.values.add(KeyValueModel("key", "value"))
+                            }
+                        }
+                        button("-") {
+                            minWidth = 50.0
+                            action {
+                                model.values.remove(model.selected.get())
+                            }
+                        }
                     }
-                }
-                tableview<KeyValueModel>(model.values) {
-                    visibleWhen { dataField.selectedProperty() }
-                    isEditable = true
-                    maxHeight = 200.0
-                    bindSelected(model.selected)
-                    column("Key", KeyValueModel::keyProperty).makeEditable()
-                    column("Value", KeyValueModel::valueProperty).makeEditable()
-                }
-                vbox {
-                    visibleWhen { dataField.selectedProperty() }
-                    button("+") { action {
-                        model.values.add(KeyValueModel("key", "value"))
-                    } }
-                    button("-") { action {
-                        model.values.remove(model.selected.get())
-                    } }
                 }
             }
         }
