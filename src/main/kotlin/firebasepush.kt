@@ -54,7 +54,7 @@ class KeyValueModel(key: String, value: String) {
     }
 }
 
-class PayloadModel : ItemViewModel<Payload>() {
+class PayloadViewModel : ItemViewModel<Payload>() {
     val tokens = SimpleListProperty<String>()
     val title = SimpleStringProperty()
     val body = SimpleStringProperty()
@@ -96,7 +96,7 @@ class MainView : View("Firebase Push") {
         }
     }
 
-    val model: PayloadModel by inject()
+    val model: PayloadViewModel by inject()
 
     var dataField: CheckBox by singleAssign()
     var notificationField: CheckBox by singleAssign()
