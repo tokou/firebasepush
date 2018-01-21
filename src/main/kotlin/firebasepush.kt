@@ -1,4 +1,5 @@
 import javafx.beans.property.*
+import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.geometry.Orientation
 import javafx.scene.control.CheckBox
@@ -7,16 +8,11 @@ import javafx.scene.layout.Priority
 import javafx.util.StringConverter
 import tornadofx.*
 
-class Payload : JsonModel {
-    val registrationIdsProperty = SimpleListProperty<String>()
-    var registrationIds by registrationIdsProperty
-
-    val notificationProperty = SimpleObjectProperty<Notification>()
-    var notification by notificationProperty
-
-    val dataProperty = SimpleObjectProperty<Data>()
-    var data by dataProperty
-
+data class Payload(
+    private val registrationIds: List<String>,
+    private val notification: Notification?,
+    private val data: Data?
+) : JsonModel {
     override fun toJSON(json: JsonBuilder) { with(json) {
         add("registration_ids", registrationIds)
         add("notification", notification)
@@ -24,25 +20,21 @@ class Payload : JsonModel {
     } }
 }
 
-class Notification : JsonModel {
-    val titleProperty = SimpleStringProperty()
-    var title by titleProperty
-
-    val bodyProperty = SimpleStringProperty()
-    var body by bodyProperty
-
+data class Notification(
+    private val title: String?,
+    private val body: String?
+) : JsonModel {
     override fun toJSON(json: JsonBuilder) { with(json) {
         add("title", title)
         add("body", body)
     } }
 }
 
-class Data : JsonModel {
-    val valuesProperty = SimpleMapProperty<String, String>()
-    var values by valuesProperty
-
+data class Data(
+    private val values: Map<String, String>
+) : JsonModel {
     override fun toJSON(json: JsonBuilder) { with(json) {
-        values?.forEach { k, v -> add(k, v) }
+        values.forEach { k, v -> add(k, v) }
     } }
 }
 
@@ -62,34 +54,23 @@ class KeyValueModel(key: String, value: String) {
     }
 }
 
-class PayloadModel : ItemViewModel<Payload>(Payload()) {
-    val tokens = bind { item?.registrationIdsProperty }
+class PayloadModel : ItemViewModel<Payload>() {
+    val tokens = SimpleListProperty<String>()
     val title = SimpleStringProperty()
     val body = SimpleStringProperty()
     val notification = SimpleBooleanProperty()
     val data = SimpleBooleanProperty()
-    val values = SimpleListProperty<KeyValueModel>()
-    val selected = SimpleObjectProperty<KeyValueModel>()
-
-    init {
-        notification.addListener { _, o, n ->
-            if (n && !o) item?.notification = Notification()
-            if (!n && o) item?.notification = null
-            item?.notification?.titleProperty?.bind(title)
-            item?.notification?.bodyProperty?.bind(body)
-        }
-        data.addListener { _, o, n ->
-            if (n && !o) item?.data = Data()
-            if (!n && o) item?.data = null
-        }
-        values.set(mutableListOf<KeyValueModel>().observable())
-    }
+    val values = SimpleListProperty<KeyValueModel>(FXCollections.observableArrayList())
+    val selected = SimpleObjectProperty<KeyValueModel>(KeyValueModel("", ""))
 
     override fun onCommit() {
-        item?.data?.values = convertValues()
+        val payloadNotification = if (notification.value) Notification(title.get(), body.get()) else null
+        val payloadData = if (data.value) Data(convertValues()) else null
+        val registrationIds = tokens.get() ?: emptyList<String>()
+        item = Payload(registrationIds, payloadNotification, payloadData)
     }
 
-    private fun convertValues() = values.get().map { it.key to it.value }.toMap().observable()
+    private fun convertValues() = values.map { it.key to it.value }.toMap()
 }
 
 class MainView : View("Firebase Push") {

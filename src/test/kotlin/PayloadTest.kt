@@ -1,22 +1,16 @@
-import javafx.collections.FXCollections
 import junit.framework.Assert.assertEquals
 import org.junit.Test
 
 class PayloadTest {
     @Test
     fun payload() {
-        val payload = Payload()
-        payload.registrationIds = FXCollections.observableArrayList("id1", "id2")
-        val notification = Notification()
-        notification.title = "Hello"
-        notification.body = "World"
-        val data = Data()
-        data.values = FXCollections.observableHashMap()
-        data.values["my"] = "data"
-        data.values["is"] = "awesome"
-        payload.notification = notification
-        payload.data = data
-
+        val notification = Notification("Hello", "World")
+        val data = Data(mapOf("is" to "awesome", "my" to "data"))
+        val payload = Payload(
+            listOf("id1", "id2"),
+            notification,
+            data
+        )
         val json = payload.toJSON().toString()
         val expected = """
         {
