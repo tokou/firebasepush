@@ -13,6 +13,9 @@ group 'com.github.tokou.firebasepush'
 version '0.9'
 
 apply plugin: 'kotlin'
+apply plugin: 'application'
+
+mainClassName = 'com.github.tokou.firebasepush.FirebasePushApp'
 
 repositories {
     mavenCentral()
@@ -29,7 +32,7 @@ jar {
         attributes(
             "Implementation-Title": "FirebasePush",
             "Implementation-Version": version,
-            "Main-Class": "com.github.tokou.firebasepush.FirebasePushApp",
+            "Main-Class": mainClassName,
             "Class-Path": configurations.compile.collect { it.getName() }.join(' ')
         )
     }
