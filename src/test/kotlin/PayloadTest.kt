@@ -7,7 +7,7 @@ import org.junit.Test
 class PayloadTest {
     @Test
     fun payload() {
-        val notification = Notification("Hello", "World")
+        val notification = Notification("Hello", "World", "default")
         val data = Data(mapOf("is" to "awesome", "my" to "data"))
         val payload = Payload(
             listOf("id1", "id2"),
@@ -20,7 +20,8 @@ class PayloadTest {
             "registration_ids":["id1","id2"],
             "notification":{
                 "title":"Hello",
-                "body":"World"
+                "body":"World",
+                "sound":"default"
             },
             "data":{
                 "is":"awesome",

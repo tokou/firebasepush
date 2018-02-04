@@ -16,11 +16,13 @@ data class Payload(
 
 data class Notification(
     private val title: String?,
-    private val body: String?
+    private val body: String?,
+    private val sound: String?
 ) : JsonModel {
     override fun toJSON(json: JsonBuilder) { with(json) {
         add("title", title)
         add("body", body)
+        add("sound", sound)
     } }
 }
 

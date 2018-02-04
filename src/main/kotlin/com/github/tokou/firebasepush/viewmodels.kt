@@ -28,12 +28,14 @@ class PayloadViewModel : ItemViewModel<Payload>() {
     val title = SimpleStringProperty()
     val body = SimpleStringProperty()
     val notification = SimpleBooleanProperty()
+    val sound = SimpleBooleanProperty()
     val data = SimpleBooleanProperty()
     val values = SimpleListProperty<KeyValueViewModel>(FXCollections.observableArrayList())
     val selected = SimpleObjectProperty<KeyValueViewModel>(KeyValueViewModel("", ""))
 
     override fun onCommit() {
-        val payloadNotification = if (notification.value) Notification(title.get(), body.get()) else null
+        val soundValue = if (sound.get()) "default" else null
+        val payloadNotification = if (notification.value) Notification(title.get(), body.get(), soundValue) else null
         val payloadData = if (data.value) Data(convertValues()) else null
         val registrationIds = tokens.get() ?: emptyList<String>()
         item = Payload(registrationIds, payloadNotification, payloadData)
