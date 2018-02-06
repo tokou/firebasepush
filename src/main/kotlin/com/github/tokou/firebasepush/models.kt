@@ -33,3 +33,21 @@ data class Data(
         values.forEach { k, v -> add(k, v) }
     } }
 }
+
+data class Priority(
+    val priority: String
+)
+
+sealed class PriorityValue {
+    abstract val value: String
+
+    object HIGH: PriorityValue() {
+        override val value: String
+            get() = "high"
+    }
+
+    object DEFAULT: PriorityValue() {
+        override val value: String
+            get() = "normal"
+    }
+}
