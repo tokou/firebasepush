@@ -43,7 +43,7 @@ class PayloadViewModel : ItemViewModel<Payload>() {
         val payloadData = if (data.value) Data(convertValues()) else null
         val payloadPriority =  if (priority.value) Priority(prioritySelected.get()) else null
         val registrationIds = tokens.get() ?: emptyList<String>()
-        item = Payload(registrationIds, payloadNotification, payloadData)
+        item = Payload(registrationIds, payloadNotification, payloadData, payloadPriority)
     }
 
     private fun convertValues() = values.map { it.key to it.value }.toMap()
