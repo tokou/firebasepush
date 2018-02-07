@@ -1,6 +1,7 @@
 package com.github.tokou.firebasepush
 
 import javafx.beans.property.SimpleStringProperty
+import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import javafx.geometry.Orientation
 import javafx.scene.control.CheckBox
@@ -35,6 +36,7 @@ class MainView : View("Firebase Push") {
 
     var dataField: CheckBox by singleAssign()
     var notificationField: CheckBox by singleAssign()
+    var priorityField: CheckBox by singleAssign()
     var serverKeyField: TextField by singleAssign()
 
     val statusProperty = SimpleStringProperty("")
@@ -82,6 +84,11 @@ class MainView : View("Firebase Push") {
                             dataField = this
                         }
                     }
+                    field {
+                        checkbox("Priority", model.priority) {
+                            priorityField = this
+                        }
+                    }
                 }
                 center = vbox {
                     spacing = 10.0
@@ -121,6 +128,16 @@ class MainView : View("Firebase Push") {
                             }
                         }
                     }
+                    fieldset {
+                        spacing = 4.0
+                        visibleWhen { priorityField.selectedProperty() }
+                        val choices = FXCollections.observableArrayList(PriorityValue.DEFAULT.value, PriorityValue.HIGH.value)
+                        field("Priority value") {
+                            combobox(model.prioritySelected, choices)
+                            minWidth = 270.0
+                        }
+                    }
+
                 }
             }
         }

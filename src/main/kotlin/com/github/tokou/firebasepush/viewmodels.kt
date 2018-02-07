@@ -5,7 +5,9 @@ import javafx.beans.property.SimpleListProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections
-import tornadofx.*
+import tornadofx.ItemViewModel
+import tornadofx.getValue
+import tornadofx.setValue
 
 class KeyValueViewModel(key: String, value: String) {
     val keyProperty = SimpleStringProperty(key)
@@ -30,6 +32,8 @@ class PayloadViewModel : ItemViewModel<Payload>() {
     val notification = SimpleBooleanProperty()
     val sound = SimpleBooleanProperty()
     val data = SimpleBooleanProperty()
+    val priority = SimpleBooleanProperty()
+    val prioritySelected = SimpleStringProperty()
     val values = SimpleListProperty<KeyValueViewModel>(FXCollections.observableArrayList())
     val selected = SimpleObjectProperty<KeyValueViewModel>(KeyValueViewModel("", ""))
 
@@ -37,8 +41,9 @@ class PayloadViewModel : ItemViewModel<Payload>() {
         val soundValue = if (sound.get()) "default" else null
         val payloadNotification = if (notification.value) Notification(title.get(), body.get(), soundValue) else null
         val payloadData = if (data.value) Data(convertValues()) else null
+        val payloadPriority =  if (priority.value) Priority(prioritySelected.get()) else null
         val registrationIds = tokens.get() ?: emptyList<String>()
-        item = Payload(registrationIds, payloadNotification, payloadData)
+        item = Payload(registrationIds, payloadNotification, payloadData, payloadPriority)
     }
 
     private fun convertValues() = values.map { it.key to it.value }.toMap()
