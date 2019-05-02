@@ -94,6 +94,7 @@ class MainView : View("Firebase Push") {
                         field("Body") {
                             textfield(model.body)
                         }
+                        checkbox("Mutable-Content", model.mutableContent)
                         checkbox("Sound", model.sound)
                     }
                     tableview<KeyValueViewModel>(model.values) {
