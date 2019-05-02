@@ -29,6 +29,7 @@ class PayloadViewModel : ItemViewModel<Payload>() {
     val body = SimpleStringProperty()
     val notification = SimpleBooleanProperty()
     val sound = SimpleBooleanProperty()
+    val mutableContent = SimpleBooleanProperty()
     val data = SimpleBooleanProperty()
     val values = SimpleListProperty<KeyValueViewModel>(FXCollections.observableArrayList())
     val selected = SimpleObjectProperty<KeyValueViewModel>(KeyValueViewModel("", ""))
@@ -38,7 +39,7 @@ class PayloadViewModel : ItemViewModel<Payload>() {
         val payloadNotification = if (notification.value) Notification(title.get(), body.get(), soundValue) else null
         val payloadData = if (data.value) Data(convertValues()) else null
         val registrationIds = tokens.get() ?: emptyList<String>()
-        item = Payload(registrationIds, payloadNotification, payloadData)
+        item = Payload(registrationIds, payloadNotification, mutableContent.value, payloadData)
     }
 
     private fun convertValues() = values.map { it.key to it.value }.toMap()

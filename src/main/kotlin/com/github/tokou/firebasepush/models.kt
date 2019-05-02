@@ -5,11 +5,13 @@ import tornadofx.*
 data class Payload(
     private val registrationIds: List<String>,
     private val notification: Notification?,
+    private val mutableContent: Boolean?,
     private val data: Data?
 ) : JsonModel {
     override fun toJSON(json: JsonBuilder) { with(json) {
         add("registration_ids", registrationIds)
         add("notification", notification)
+        add("mutable_content", mutableContent)
         add("data", data)
     } }
 }
